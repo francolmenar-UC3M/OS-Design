@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <stdlib.h> 
+#include <stdlib.h>
 #include <signal.h> // sigaction(), sigsuspend(), sig*()
 #include <unistd.h> // alarm()
 
@@ -8,11 +8,11 @@ void handle_sigalrm(int signal);
 void do_sleep(int seconds);
 
 /* Usage example
- * 
+ *
  * First, compile and run this program:
  *     $ gcc signal.c
  *     $ ./a.out
- * 
+ *
  * It will print out its pid. Use it from another terminal to send signals
  *     $ kill -HUP <pid>
  *     $ kill -USR1 <pid>
@@ -26,26 +26,26 @@ int main() {
     // Print pid, so that we can send signals from other shells
     printf("My pid is: %d\n", getpid());
     // Setup the sighub handler with handle_signal function
-    sa.sa_handler = ...;
+    sa.sa_handler = handle_signal;
     // Restart the system call, if at all possible
     sa.sa_flags = SA_RESTART;
 
     // Block every signal during the handler; fill sa.sa_mask
-    sigfillset( ... );
+    sigfillset(&sa.sa_mask);
 
     // Intercept SIGHUP and SIGINT
-    if (sigaction(SIGHUP, &sa, NULL) == -1) 
-       perror("Error: cannot handle SIGHUP"); // Should not happen 
+    if (sigaction(SIGHUP, &sa, NULL) == -1)
+       perror("Error: cannot handle SIGHUP"); // Should not happen
 
-    if (sigaction(SIGUSR1, &sa, NULL) == -1) 
-       perror("Error: cannot handle SIGUSR1"); // Should not happen 
+    if (sigaction(SIGUSR1, &sa, NULL) == -1)
+       perror("Error: cannot handle SIGUSR1"); // Should not happen
 
     // Will always fail, SIGKILL is intended to force kill your process
     if (sigaction(SIGKILL, &sa, NULL) == -1) {
         perror("Cannot handle SIGKILL"); // Will always happen
         printf("You can never handle SIGKILL anyway...\n");  }
 
-    if (sigaction(SIGINT, &sa, NULL) == -1) 
+    if (sigaction(SIGINT, &sa, NULL) == -1)
         perror("Error: cannot handle SIGINT"); // Should not happen
 
     for (;;) {
@@ -87,7 +87,7 @@ void handle_signal(int signal) {
     // So what did you send me while I was asleep?
 
     // Suspend until signals in pending mask are caught
-    sigpending( ... );
+    sigpending( &pending );
     if (sigismember(&pending, SIGHUP)) {
         printf("A SIGHUP is waiting\n");
     }
@@ -111,23 +111,23 @@ void do_sleep(int seconds) {
     sigset_t mask;
 
     // Set sa_handler to handle_sigalrm
-    sa.sa_handler = ...; // Intercept and ignore SIGALRM
+    sa.sa_handler = handle_sigalrm ;// Intercept and ignore SIGALRM
     sa.sa_flags = SA_RESETHAND; // Remove the handler after first signal
     // Fill mask sa.sa_mask
-    sigfillset( ... );
+    sigfillset( &sa.sa_mask );
 
     sigaction(SIGALRM, &sa, NULL);
 
     // Get the current signal mask and store it mask
-    sigprocmask( ... );
+    sigprocmask( SIG_BLOCK,  &mask, &sa.sa_mask);
 
     // Unblock SIGALRM in mask
-    sigdelset( ... );
+    sigdelset( &mask,  SIGALRM);
 
     // Wait with this mask "seconds"
-    alarm( ... );
+    alarm( 1 );
     // Suspend until SIGALRM is caught
-    sigsuspend( ... );
+    sigsuspend( &mask );
 
     printf("sigsuspend() returned\n");
 }

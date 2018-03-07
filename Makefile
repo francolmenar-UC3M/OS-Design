@@ -3,17 +3,17 @@
 CC	= gcc
 LD	= gcc
 
-CFLAGS	= -g 
-CFLAGS	+= -I. 
-LDFLAGS	= 
+CFLAGS	= -g
+CFLAGS	+= -I.
+LDFLAGS	=
 
-OBJS	= 
+OBJS	=
 
 LIBS	= #-lpthread
 
 SRCS	= $(patsubst %.o,%.c,$(OBJS))
 
-PRGS	= example2 example3 example4 example5 example6 example7 exercise1 exercise2 exercise3
+PRGS	= example8 example2 example3 example4 example5 example6 example7 exercise1 exercise2 exercise3
 
 all: $(PRGS)
 
@@ -27,4 +27,3 @@ $(PRGS): % : %.o
 
 clean:
 	-rm -f *.o  *~ $(PRGS)
-
